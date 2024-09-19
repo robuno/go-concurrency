@@ -31,8 +31,8 @@ func handleBroadcast() {
 																				// send message to the client(s)
 																				// convert str to byt slices, client.conn = tcp conn
             client.conn.Write([]byte("\r" + strings.Repeat(" ", 100) + "\r"))	// clear current input line
-            client.conn.Write([]byte(msg + "\n"))                            	// Write the broadcasted message
-            client.conn.Write([]byte("> "))                                  	// Reprint the prompt
+            client.conn.Write([]byte(msg + "\n"))								// Write the broadcasted message
+            client.conn.Write([]byte("> "))										// Reprint the prompt
         }
         mutex.Unlock()
     }
@@ -44,9 +44,9 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	// create a new client
-	conn.Write([]byte("Enter your name: "))          				 // send msg to client
-	name, _ := bufio.NewReader(conn).ReadString('\n')				 // read client's input, server reads the data
-	name = strings.TrimSpace(name)									 // remove the newline
+	conn.Write([]byte("Enter your name: "))							// send msg to client
+	name, _ := bufio.NewReader(conn).ReadString('\n')				// read client's input, server reads the data
+	name = strings.TrimSpace(name)									// remove the newline
 	client := Client{conn: conn, name: name}
 
 	// add client to the map
@@ -58,7 +58,7 @@ func handleConnection(conn net.Conn) {
 
 	// always listen messages from the client
 	for {
-		message, err := bufio.NewReader(conn).ReadString('\n') 		 // read client message
+		message, err := bufio.NewReader(conn).ReadString('\n')		// read client message
 		if err != nil {
             broadcast <- fmt.Sprintf("%s has left the chat", client.name)
             mutex.Lock()
@@ -67,26 +67,25 @@ func handleConnection(conn net.Conn) {
             conn.Close()
             return
         }
-		message = strings.TrimSpace(message)			    		// remove the newline
-		if len(message) > 0 { 										// Only broadcast non-empty messages
+		message = strings.TrimSpace(message)						// remove the newline
+		if len(message) > 0 {										// Only broadcast non-empty messages
             broadcast <- fmt.Sprintf("%s: %s", client.name, message)
         }
 	}
 }
 
 func main() {
-	//
-	listener, err := net.Listen("tcp", ":8080") 					// listen tcp conn's on port 8080
+
+	listener, err := net.Listen("tcp", ":8080")				// listen tcp conn's on port 8080
 	if err != nil {
 		fmt.Println("Error starting server:", err)
 		return
 	}
-	defer listener.Close() 											// release network port
+	defer listener.Close()									// release network port
 	fmt.Println("Server started on: 8080")
 
 	// always runs, reads message from broadcast and sends to all clients
 	go handleBroadcast()
-
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
