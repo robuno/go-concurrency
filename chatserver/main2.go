@@ -19,7 +19,6 @@ var (
 	mutex     sync.Mutex      												    // handle concurrent access to client map
 )
 
-
 // goroutine = broadcasting messages to all clients
 func handleBroadcast() {
     for {																		// always wait for new messages in broadcast channel
@@ -38,7 +37,6 @@ func handleBroadcast() {
     }
 }
 
-
 // goroutine = handle incoming connections
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
@@ -49,9 +47,8 @@ func handleConnection(conn net.Conn) {
 	name = strings.TrimSpace(name)									// remove the newline
 	client := Client{conn: conn, name: name}
 
-	// add client to the map
 	mutex.Lock()
-	clients[conn] = client // socket - name pair
+	clients[conn] = client // socket - name pair, add client to the map
 	mutex.Unlock()
 
 	broadcast <- fmt.Sprintf("%s has joined the chat", client.name)
