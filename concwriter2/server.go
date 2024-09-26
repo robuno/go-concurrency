@@ -8,20 +8,22 @@ import (
 	"strings"
 )
 
-func HandleConnection(conn net.Conn, clientID string) {
+func HandleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
 	for {
 		message, err := reader.ReadString('\n')
 		if err != nil {
-			log.Printf("%s disconnected", clientID)
+			log.Printf("%s disconnected", conn.RemoteAddr())
 			return
 		}
 
 		// get client message
 		message = strings.TrimSpace(message)
 		parts := strings.Split(message, " ")
+
+		clientID := parts[0]
 
 		// check whether request format okay
 		if len(parts) < 2 {
@@ -30,12 +32,12 @@ func HandleConnection(conn net.Conn, clientID string) {
 		}
 
 		// get msg parts
-		command := parts[0]
-		key := parts[1]
+		command := parts[1]
+		key := parts[2]
 		value := ""
 
 		if command == "set" && len(parts) >= 3 {
-			value = strings.Join(parts[2:], " ")
+			value = strings.Join(parts[3:], " ")
 		}
 
 		// log file
@@ -43,8 +45,8 @@ func HandleConnection(conn net.Conn, clientID string) {
 		case "get":
 			err := logAndRetry(clientID, "get", key, "")
 			if err != nil {
-				log.Printf("Error: %v", err)
-				conn.Write([]byte("Error in logging [GET]\n"))
+				log.Printf("+Error* for %v: %v", clientID, err)
+				conn.Write([]byte(fmt.Sprintf("[ERROR] in logging [GET], err: %v\n", err)))
 			} else {
 				conn.Write([]byte(fmt.Sprintf("GET request for key: %s\n", key)))
 			}
@@ -53,7 +55,7 @@ func HandleConnection(conn net.Conn, clientID string) {
 			err := logAndRetry(clientID, "set", key, value)
 			if err != nil {
 				log.Printf("Error: %v", err)
-				conn.Write([]byte("Error in logging [SET]\n"))
+				conn.Write([]byte(fmt.Sprintf("[ERROR] in logging [SET], err: %v\n", err)))
 			} else {
 				conn.Write([]byte(fmt.Sprintf("SET request for key: %s, value: %s\n", key, value)))
 			}
@@ -62,7 +64,7 @@ func HandleConnection(conn net.Conn, clientID string) {
 			err := logAndRetry(clientID, "rm", key, "")
 			if err != nil {
 				log.Printf("Error: %v", err)
-				conn.Write([]byte("Error in logging [RM]\n"))
+				conn.Write([]byte(fmt.Sprintf("[ERROR] in logging [RM], err: %v\n", err)))
 			} else {
 				conn.Write([]byte(fmt.Sprintf("RM request for key: %s\n", key)))
 			}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 )
@@ -17,7 +16,6 @@ func main() {
 
 	log.Printf("Server is listening on port %v\n", selectedPort)
 
-	clientCounter := 0
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -25,15 +23,12 @@ func main() {
 			continue
 		}
 
-		clientCounter++
-		clientID := fmt.Sprintf("client%d", clientCounter)
-		log.Printf("New connection from %s", clientID)
+		log.Printf("New connection from %s", conn.RemoteAddr())
 
 		// call server
-		go HandleConnection(conn, clientID)
+		go HandleConnection(conn)
 	}
 }
-
 
 // go run main.go server.go log.go
 // go run client.go

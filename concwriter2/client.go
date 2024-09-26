@@ -10,11 +10,10 @@ import (
 )
 
 var actions = []string{"get", "set", "rm"}
+// var actions = []string{"get"}
 
 // client generator with random requests
-func simulateClient(clientID int, wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func simulateClient(clientID int) {
 	// // increase val = spread load
 	// time.Sleep(time.Duration(rand.Intn(10)) * time.Millisecond)
 
@@ -32,12 +31,12 @@ func simulateClient(clientID int, wg *sync.WaitGroup) {
 	var request string
 	if action == "set" {
 		value := fmt.Sprintf("value%d", rand.Intn(100)) // value[0-99]
-		request = fmt.Sprintf("%s %s %s\n", action, key, value)
+		request = fmt.Sprintf("%d %s %s %s\n", clientID, action, key, value)
 	} else {
-		request = fmt.Sprintf("%s %s\n", action, key)
+		request = fmt.Sprintf("%d %s %s\n", clientID, action, key)
 	}
 
-	fmt.Printf("Client %d: Sending request: %s", clientID, request)
+	//fmt.Printf("Client %d: Sending request: %s", clientID, request)
 
 	// send the request to the server
 	_, err = conn.Write([]byte(request))
@@ -54,19 +53,28 @@ func simulateClient(clientID int, wg *sync.WaitGroup) {
 		return
 	}
 
+	// print response
 	response := strings.TrimSpace(string(buffer[:n]))
 	fmt.Printf("Client %d: Received response: %s\n", clientID, response)
+	// if strings.HasPrefix(response, "[ERROR]") {
+	// 	fmt.Printf("## Error Client %d: Received response: %s\n", clientID, response)
+	// } else {
+	// 	fmt.Printf("Client %d: Received response: %s\n", clientID, response)
+	// }
 }
 
 func main() {
 	var wg sync.WaitGroup
 	rand.Seed(time.Now().UnixNano())
 
-	clientCount := 200
+	clientCount := 50
 
 	for i := 1; i <= clientCount; i++ {
 		wg.Add(1)
-		go simulateClient(i, &wg) // each client = a new goroutine
+		go func() {
+			defer wg.Done()
+			simulateClient(i) // each client = a new goroutine
+		}()
 	}
 
 	wg.Wait()
