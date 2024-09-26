@@ -52,24 +52,24 @@ func getLogHandler(w http.ResponseWriter, r *http.Request) {
 	key := keys[0]
 	fmt.Printf("Searching logs for key: %s...\n", key)
 
-	// Search the log file for the specified key
+	// search the key in log file
 	results, err := searchLogFile(key)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	// Print the results in the HTTP response
+	// print the results 
 	for _, result := range results {
 		fmt.Fprintf(w, "%s\n", result)
 	}
 }
 
 func main() {
-	// HTTP Routers
+	// HTTP routers
 	http.HandleFunc("/get", getLogHandler)
 
-	// Start the HTTP server
+	// start the HTTP server
 	selectedPort := ":8085"
 	fmt.Printf("Starting HTTP server on port %s...\n", selectedPort)
 	err := http.ListenAndServe(selectedPort, nil)
