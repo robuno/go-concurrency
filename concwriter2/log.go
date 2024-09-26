@@ -12,7 +12,7 @@ import (
 var mu sync.Mutex
 
 const maxRetries = 2
-const retryDelay = 5000 * time.Millisecond
+const retryDelay = 200 * time.Millisecond
 
 func logAndRetry(clientID, action, key, value string) error {
 	retryCount := 0
