@@ -53,3 +53,5 @@ func main() {
 		fmt.Printf("Error: StatusCode: %d, StatusDesc: %s\n", resp.StatusCode, resp.Status)
 	}
 }
+
+// go run http_client.go get key5

@@ -22,7 +22,7 @@ func searchLogFile(key string) ([]string, error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, key) {		// check if the line contains the key
+		if strings.Contains(line, key) { // check if the line contains the key
 			results = append(results, line)
 		}
 	}
@@ -41,7 +41,7 @@ func searchLogFile(key string) ([]string, error) {
 }
 
 func getLogHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 	// parse the key from url
 	keys, ok := r.URL.Query()["key"]
 	if !ok || len(keys[0]) < 1 {
@@ -78,5 +78,5 @@ func main() {
 	}
 }
 
-
+// go run http_server.go
 // curl "http://localhost:8085/get?key=key5"
